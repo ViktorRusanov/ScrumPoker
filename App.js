@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Animated, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Animated } from 'react-native';
 import CardList from './src/components/CardList/CardList';
 import Card from './src/components/Card/Card';
 
@@ -9,7 +9,8 @@ export default class App extends React.Component {
 
     this.state = {
       cardList: [1, 2, 3, 5, 8, 13, 20, 40, 100, '?'],
-      currentCard: '100'
+      currentCard: '100',
+      zIndex: -1
     }
   }
 
@@ -53,9 +54,10 @@ export default class App extends React.Component {
       }).start();
     }
   }
-  handlePress = (number) => {
+  handleSelectCard = (number) => {
     this.setState({
-      currentCard: number
+      currentCard: number,
+      zIndex: this.state.zIndex < 0 ? 1: -1
     });
     this.flipCard();
   };
@@ -70,14 +72,15 @@ export default class App extends React.Component {
         {rotateY: this.backInterpolate}
       ]
     };
-    const {cardList, currentCard} = this.state;
+    const {cardList, currentCard, zIndex} = this.state;
+    const { container, generalCardStyle, smallCard, bigCard, generalStyle, backStyle } = styles;
     return (
-      <View style={styles.container}>
-            <Animated.View style={[styles.frontStyle, frontAnimatedStyle, {opacity: this.frontOpacity}]}>
-              <CardList list={cardList} cardStyle={[styles.cardStyle, styles.smallCard]} pressCard={this.handlePress} />
+      <View style={container}>
+            <Animated.View style={[generalStyle, frontAnimatedStyle, {opacity: this.frontOpacity}]}>
+              <CardList list={cardList} cardStyle={[generalCardStyle, smallCard]} pressCard={this.handleSelectCard} />
             </Animated.View>
-            <Animated.View style={[styles.frontStyle, styles.backCard, backAnimatedStyle, {opacity: this.backOpacity}]}>
-              <Card number={currentCard} cardStyle={[styles.cardStyle, styles.bigCard]} pressCard={this.handlePress} />
+            <Animated.View style={[generalStyle, backStyle, backAnimatedStyle, {opacity: this.backOpacity, zIndex}]}>
+              <Card number={currentCard} cardStyle={[generalCardStyle, bigCard]} pressCard={this.handleSelectCard} />
             </Animated.View>
       </View>
     );
@@ -91,10 +94,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white'
+    backgroundColor: 'black'
   },
 
-  frontStyle: {
+  generalStyle: {
     flex: 1,
     flexWrap: 'wrap',
     flexDirection: 'row',
@@ -103,14 +106,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     height: '100%',
-    paddingTop: '15%'
-
+    paddingTop: '15%',
+    backfaceVisibility: 'hidden'
   },
-  backCard: {
+  backStyle: {
     position: 'absolute',
     width: '100%',
-    height: '100%',
-    zIndex: -1
+    height: '100%'
   },
   smallCard: {
     width: 90,
@@ -122,7 +124,7 @@ const styles = StyleSheet.create({
     height: 300,
     fontSize: 60
   },
-  cardStyle: {
+  generalCardStyle: {
     fontFamily: 'serif',
     fontWeight: 'bold',
     color: 'white',
@@ -130,11 +132,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textAlignVertical: 'center',
     borderStyle: 'solid',
-    borderWidth: 5,
-    borderRadius: 10,
-    borderColor: 'white',
-    margin: 10,
-
+    borderRadius: 15,
+    margin: 10
   }
 });
 
